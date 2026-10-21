@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#102b57">
+  <meta name="description" content="Tableau de bord synthétique du propriétaire ELIMU">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="ELIMU Propriétaire">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./assets/school-logo.png">
+  <link rel="apple-touch-icon" href="./assets/static/icon-192.png">
+  <link rel="stylesheet" href="./styles.css?v=20261021-m1">
+  <title>ELIMU · Espace propriétaire</title>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><img src="./assets/school-logo.png" alt="" width="40" height="40"><span><strong id="school-name">ELIMU</strong><small>Lecture propriétaire</small></span></div>
+    <span id="sync-status" class="status" role="status">Chargement…</span>
+  </header>
+  <main>
+    <section id="login" class="login-shell">
+      <div class="login-card"><img src="./assets/static/elimu-logo.png" alt="ELIMU" class="elimu-mark" width="52" height="52"><h2>Chargement du tableau</h2><p id="login-error">Récupération des dernières données publiées…</p></div>
+    </section>
+
+    <section id="dashboard" class="hidden">
+      <div class="welcome">
+        <p class="eyebrow">Tableau propriétaire</p>
+        <h1 id="dashboard-title">Votre établissement</h1>
+        <p id="snapshot-meta" class="muted">Dernière publication : —</p>
+        <p id="cache-note" class="cache-note hidden"></p>
+      </div>
+
+      <section class="panel period-panel">
+        <div><p class="eyebrow">Période</p><h2>Situation à la période choisie</h2></div>
+        <div class="period-controls">
+          <label>Période
+            <select id="period"><option value="today">Aujourd’hui</option><option value="yesterday">Hier</option><option value="week">Cette semaine</option><option value="14d">14 derniers jours</option><option value="month">Ce mois</option><option value="all">Toute la période publiée</option><option value="custom">Période personnalisée</option></select>
+          </label>
+          <div id="custom-period" class="custom-period hidden"><label>Du <input id="period-start" type="date"></label><label>Au <input id="period-end" type="date"></label></div>
+          <button id="apply-period" type="button" class="primary">Actualiser</button>
+        </div>
+        <p id="period-label" class="muted"></p>
+      </section>
+
+      <div id="summary" class="summary-grid"></div>
+
+      <section class="panel"><div class="panel-head"><div><p class="eyebrow">Situation financière</p><h2>Résumé de la période</h2></div><span id="finance-count" class="count"></span></div><div id="finance-summary" class="finance-summary"></div><div id="finance-rows" class="operation-list"></div></section>
+
+      <section class="panel"><div class="panel-head"><div><p class="eyebrow">Activité récente</p><h2>Mouvements de la période</h2></div><span id="operation-count" class="count"></span></div><div id="operations" class="operation-list"></div></section>
+    </section>
+
+    <section id="empty" class="empty hidden"><h2>Données indisponibles</h2><p id="empty-message">La publication Google Sheets n’est pas encore accessible.</p><button id="retry" type="button" class="primary">Réessayer</button></section>
+  </main>
+  <script src="./config.js?v=20261021-m1"></script><script src="./app.js?v=20261021-m1"></script>
+</body>
+</html>
