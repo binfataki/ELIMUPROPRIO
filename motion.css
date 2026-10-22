@@ -1,0 +1,43 @@
+/* Portail propriétaire — mouvement discret et confort tactile. Chargé après styles.css.
+   Visuel uniquement : aucun changement de données ni d'appel API.
+   Les entrées animées ne jouent qu'à l'ouverture et sur une action de la personne
+   (changement de période, Actualiser) via l'attribut data-motion posé par motion.js. */
+
+:root{--m-ease:cubic-bezier(.23,1,.32,1)}
+@keyframes m-rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes m-pop{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:none}}
+@keyframes m-fade{from{opacity:0}to{opacity:1}}
+
+.primary,.quiet,.more{transition:transform 140ms var(--m-ease),background-color 150ms ease,box-shadow 150ms ease,opacity 150ms ease}
+.primary:active,.quiet:active,.more:active{transform:scale(.97)}
+select,input{transition:border-color 150ms ease,box-shadow 150ms ease}
+.status{transition:background-color 200ms ease,border-color 200ms ease}
+
+body[data-motion="on"] .welcome{animation:m-fade 180ms ease-out backwards}
+body[data-motion="on"] .panel{animation:m-rise 200ms var(--m-ease) backwards}
+body[data-motion="on"] .period-panel{animation-delay:20ms}
+body[data-motion="on"] .metric{animation:m-pop 200ms var(--m-ease) backwards}
+body[data-motion="on"] .metric:nth-child(2){animation-delay:25ms}
+body[data-motion="on"] .metric:nth-child(3){animation-delay:50ms}
+body[data-motion="on"] .metric:nth-child(4){animation-delay:75ms}
+body[data-motion="on"] .flow-card{animation:m-fade 180ms ease-out backwards}
+body[data-motion="on"] .operation{animation:m-fade 160ms ease-out backwards}
+body[data-motion="on"] .operation:nth-child(n+2){animation-delay:15ms}
+body[data-motion="on"] .operation:nth-child(n+4){animation-delay:40ms}
+body[data-motion="on"] .operation:nth-child(n+7){animation-delay:70ms}
+
+@media(pointer:coarse){
+  .primary,.quiet,.more{min-height:48px}
+}
+@media(max-width:380px){
+  .metric strong{font-size:22px}
+  .flow-card strong{font-size:18px}
+  .amount{max-width:46%}
+}
+
+@media(prefers-reduced-motion:reduce){
+  *,::before,::after{animation-duration:.01ms!important;animation-delay:0ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  .primary:active,.quiet:active,.more:active{transform:none}
+}
+
+
