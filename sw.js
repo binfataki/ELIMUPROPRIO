@@ -1,5 +1,5 @@
-const CACHE = "elimu-owner-pwa-20261025-qr-v1";
-const CORE = ["./", "./index.html", "./styles.css?v=20261025-qr", "./app.js?v=20261025-qr", "./config.js?v=20261025-qr", "./motion.css?v=20261025-qr", "./motion.js?v=20261025-qr", "./manifest.webmanifest", "./assets/school-logo.png", "./assets/static/elimu-logo.png", "./assets/static/icon-192.png", "./assets/static/icon-512.png"];
+const CACHE = "elimu-owner-pwa-20261025-school-logo-v1";
+const CORE = ["./", "./index.html", "./styles.css?v=20261025-qr", "./app.js?v=20261025-qr", "./config.js?v=20261025-qr", "./motion.css?v=20261025-qr", "./motion.js?v=20261025-qr", "./manifest.webmanifest", "./assets/school-logo.png"];
 self.addEventListener("install", (e) => e.waitUntil(caches.open(CACHE).then((c) => Promise.allSettled(CORE.map((u) => c.add(u)))).then(() => self.skipWaiting())));
 self.addEventListener("activate", (e) => e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim())));
 // Réseau d'abord ; cache en secours. Les appels Apps Script (autre origine) ne sont jamais mis en cache.

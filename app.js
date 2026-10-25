@@ -1,6 +1,6 @@
 (() => {
   const $ = selector => document.querySelector(selector);
-  const REFRESH_MS = 60 * 1000;
+  const REFRESH_HOURS = [6, 8, 10, 12, 14, 16, 18];
   const state = { fin: 12, ops: 10, data: null, financial: [], operations: [], refreshTimer: null, ownerCode: "", scanner: null, scanFrame: null };
   const cacheKey = () => "elimu-owner-dashboard:" + String(window.ELIMU_APPS_SCRIPT_URL || "default").replace(/[^a-z0-9]/gi, "_");
   const saveCache = data => { try { localStorage.setItem(cacheKey(), JSON.stringify({ savedAt: new Date().toISOString(), data })); } catch (_) {} };
@@ -71,10 +71,11 @@
         if (codes.length && codes[0].rawValue) {
           const code = extractOwnerCode(codes[0].rawValue);
           if (code) {
-            $("#owner-code").value = code;
-            $("#login-error").textContent = "QR code décodé. Vérifiez le code puis validez manuellement.";
+            if (navigator.vibrate) navigator.vibrate(80);
             stopScanner();
-            $("#owner-code").focus();
+            $("#login-error").textContent = "QR code lu. Ouverture de votre espace…";
+            $("#sync-status").textContent = "Connexion…";
+            load(code).catch(failure);
             return;
           }
         }
@@ -95,7 +96,29 @@
     if (!response.ok || !data.ok) throw new Error(data.message || data.error || "Publication indisponible");
     state.data = data; saveCache(data); render(data); $("#cache-note").classList.add("hidden"); $("#sync-status").textContent = "À jour"; startAutoRefresh();
   }
-  function startAutoRefresh() { if (state.refreshTimer) clearInterval(state.refreshTimer); state.refreshTimer = setInterval(() => { if (!document.hidden && navigator.onLine) load().catch(() => { $("#sync-status").textContent = "Actualisation en attente"; }); }, REFRESH_MS); }
+  function nextRefreshAt(now) {
+    const current = now || new Date();
+    for (const hour of REFRESH_HOURS) {
+      const candidate = new Date(current);
+      candidate.setHours(hour, 0, 0, 0);
+      if (candidate.getTime() > current.getTime()) return candidate;
+    }
+    const tomorrow = new Date(current);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(REFRESH_HOURS[0], 0, 0, 0);
+    return tomorrow;
+  }
+  function startAutoRefresh() {
+    if (state.refreshTimer) clearTimeout(state.refreshTimer);
+    const next = nextRefreshAt();
+    state.refreshTimer = setTimeout(() => {
+      if (!document.hidden && navigator.onLine) {
+        load().catch(() => { $("#sync-status").textContent = "Actualisation en attente"; startAutoRefresh(); });
+      } else {
+        startAutoRefresh();
+      }
+    }, Math.max(1000, next.getTime() - Date.now()));
+  }
   function render(data) {
     $("#login").classList.add("hidden"); $("#empty").classList.add("hidden"); $("#dashboard").classList.remove("hidden");
     const school = data.etablissement || {};
