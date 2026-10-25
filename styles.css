@@ -74,6 +74,12 @@ select:focus,input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 
 .login-card h2,.empty h2{margin:14px 0 6px;font-size:20px}
 .login-card p,.empty p{color:var(--muted)}
 .empty .primary{margin-top:16px;width:100%}
+.qr-primary-button{width:100%;min-height:58px;margin:18px 0 12px;border:0;border-radius:12px;background:var(--blue);color:#fff;font:700 17px inherit;cursor:pointer;box-shadow:0 8px 18px rgba(31,98,189,.22)}
+.manual-login{display:grid;gap:8px;margin-top:18px;text-align:left}
+.manual-login .primary{width:100%;margin-top:4px}
+.qr-scanner{display:grid;gap:10px;margin:12px 0;padding:12px;border:1px solid var(--line);border-radius:12px;background:#f7faff}
+.qr-scanner video{display:block;width:100%;max-height:280px;aspect-ratio:4/3;object-fit:cover;border-radius:10px;background:#071a38}
+.qr-scanner .quiet{width:100%}
 
 @media (min-width:640px){
   main{padding-top:28px}

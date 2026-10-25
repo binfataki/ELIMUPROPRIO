@@ -11,7 +11,8 @@
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./assets/school-logo.png">
   <link rel="apple-touch-icon" href="./assets/static/icon-192.png">
-  <link rel="stylesheet" href="./styles.css?v=20261021-m1">\n<link rel="stylesheet" href="./motion.css?v=20261022-m1">
+  <link rel="stylesheet" href="./styles.css?v=20261025-qr">
+  <link rel="stylesheet" href="./motion.css?v=20261025-qr">
   <title>ELIMU · Espace propriétaire</title>
 </head>
 <body>
@@ -21,7 +22,22 @@
   </header>
   <main>
     <section id="login" class="login-shell">
-      <div class="login-card"><img src="./assets/static/elimu-logo.png" alt="ELIMU" class="elimu-mark" width="52" height="52"><h2>Chargement du tableau</h2><p id="login-error">Récupération des dernières données publiées…</p></div>
+      <div class="login-card">
+        <img src="./assets/static/elimu-logo.png" alt="ELIMU" class="elimu-mark" width="52" height="52">
+        <h2>Accès propriétaire</h2>
+        <p id="login-error">Scannez le QR code reçu pour remplir automatiquement le code d’accès.</p>
+        <button id="scan-owner-qr" type="button" class="qr-primary-button">Scanner le QR code</button>
+        <div id="owner-scanner" class="qr-scanner hidden">
+          <video id="owner-video" playsinline muted></video>
+          <p id="scanner-status" class="muted">Recherche du QR code…</p>
+          <button id="stop-owner-qr" type="button" class="quiet">Fermer le scanner</button>
+        </div>
+        <div class="manual-login">
+          <label for="owner-code">Code d’accès</label>
+          <input id="owner-code" type="text" inputmode="text" autocomplete="one-time-code" placeholder="Saisir le code manuellement">
+          <button id="owner-login" type="button" class="primary">Ouvrir l’espace propriétaire</button>
+        </div>
+      </div>
     </section>
 
     <section id="dashboard" class="hidden">
@@ -53,7 +69,9 @@
 
     <section id="empty" class="empty hidden"><h2>Données indisponibles</h2><p id="empty-message">La publication Google Sheets n’est pas encore accessible.</p><button id="retry" type="button" class="primary">Réessayer</button></section>
   </main>
-  <script src="./config.js?v=20261021-m1"></script><script src="./app.js?v=20261021-m1"></script>\n<script src="./motion.js?v=20261022-m1"></script>
+  <script src="./config.js?v=20261025-qr"></script>
+  <script src="./app.js?v=20261025-qr"></script>
+  <script src="./motion.js?v=20261025-qr"></script>
 </body>
 </html>
 

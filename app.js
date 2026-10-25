@@ -1,7 +1,7 @@
 (() => {
   const $ = selector => document.querySelector(selector);
   const REFRESH_MS = 60 * 1000;
-  const state = { fin: 12, ops: 10, data: null, financial: [], operations: [], refreshTimer: null };
+  const state = { fin: 12, ops: 10, data: null, financial: [], operations: [], refreshTimer: null, ownerCode: "", scanner: null, scanFrame: null };
   const cacheKey = () => "elimu-owner-dashboard:" + String(window.ELIMU_APPS_SCRIPT_URL || "default").replace(/[^a-z0-9]/gi, "_");
   const saveCache = data => { try { localStorage.setItem(cacheKey(), JSON.stringify({ savedAt: new Date().toISOString(), data })); } catch (_) {} };
   const readCache = () => { try { const value = JSON.parse(localStorage.getItem(cacheKey()) || "null"); return value && value.data ? value : null; } catch (_) { return null; } };
@@ -32,9 +32,62 @@
     return { start: localDateKey(start), end: localDateKey(end), label: start.toLocaleDateString("fr-FR") + " → " + end.toLocaleDateString("fr-FR") };
   }
   const inPeriod = (date, period) => { const d = isoDate(date); if (!d) return false; return (!period.start || d >= period.start) && (!period.end || d <= period.end); };
-  async function load() {
+  function extractOwnerCode(raw) {
+    const value = String(raw || "").trim();
+    if (!value) return "";
+    try {
+      if (value[0] === "{" || value[0] === "[") {
+        const parsed = JSON.parse(value);
+        return String(parsed.ownerToken || parsed.token || parsed.code || parsed.value || "").trim();
+      }
+      const parsedUrl = new URL(value);
+      return String(parsedUrl.searchParams.get("ownerToken") || parsedUrl.searchParams.get("token") || parsedUrl.searchParams.get("code") || value).trim();
+    } catch (_) { return value; }
+  }
+  function stopScanner() {
+    if (state.scanFrame) cancelAnimationFrame(state.scanFrame);
+    state.scanFrame = null;
+    if (state.scanner) state.scanner.getTracks().forEach(track => track.stop());
+    state.scanner = null;
+    const video = $("#owner-video");
+    if (video) video.srcObject = null;
+    $("#owner-scanner").classList.add("hidden");
+  }
+  async function startScanner() {
+    if (!navigator.mediaDevices?.getUserMedia) throw new Error("La caméra n'est pas disponible dans ce navigateur.");
+    if (!("BarcodeDetector" in window)) throw new Error("Le scan QR n'est pas pris en charge ici. Utilisez la saisie manuelle.");
+    stopScanner();
+    const detector = new BarcodeDetector({ formats: ["qr_code"] });
+    const video = $("#owner-video");
+    $("#owner-scanner").classList.remove("hidden");
+    $("#scanner-status").textContent = "Autorisez la caméra puis présentez le QR code.";
+    state.scanner = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" } }, audio: false });
+    video.srcObject = state.scanner;
+    await video.play();
+    const scan = async () => {
+      if (!state.scanner) return;
+      try {
+        const codes = await detector.detect(video);
+        if (codes.length && codes[0].rawValue) {
+          const code = extractOwnerCode(codes[0].rawValue);
+          if (code) {
+            $("#owner-code").value = code;
+            $("#login-error").textContent = "QR code décodé. Vérifiez le code puis validez manuellement.";
+            stopScanner();
+            $("#owner-code").focus();
+            return;
+          }
+        }
+      } catch (_) {}
+      state.scanFrame = requestAnimationFrame(scan);
+    };
+    state.scanFrame = requestAnimationFrame(scan);
+  }
+  async function load(ownerCode) {
     $("#sync-status").textContent = "Lecture…";
-    const url = window.ELIMU_APPS_SCRIPT_URL + "?" + new URLSearchParams({ action: "ownerDashboard", _: Date.now() });
+    const code = String(ownerCode == null ? state.ownerCode : ownerCode).trim();
+    state.ownerCode = code;
+    const url = window.ELIMU_APPS_SCRIPT_URL + "?" + new URLSearchParams({ action: "ownerDashboard", ownerToken: code, token: code, code, _: Date.now() });
     const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 20000); let response, data;
     try { response = await fetch(url, { cache: "no-store", signal: ctl.signal }); data = await response.json(); }
     catch (e) { throw new Error(e.name === "AbortError" ? "Le service n'a pas répondu." : "Publication illisible ou connexion impossible."); }
@@ -114,24 +167,32 @@
   document.addEventListener("click", e => { const b = e.target.closest("[data-more]"); if (!b) return; state[b.dataset.more] += 10; renderPeriod(); });
   ["#period-start", "#period-end"].forEach(s => $(s).addEventListener("change", renderPeriod));
   document.addEventListener("visibilitychange", () => { if (!document.hidden && navigator.onLine && state.data) load().catch(() => {}); });
-  function failure() {
+  function showLogin(message) {
+    $("#login").classList.remove("hidden"); $("#dashboard").classList.add("hidden");
+    if (message) $("#login-error").textContent = message;
+  }
+  function failure(error) {
     const cached = readCache();
-    if (cached) {
+    if (cached && state.ownerCode) {
       render(cached.data); startAutoRefresh();
       $("#cache-note").textContent = "Copie locale affichée · dernière synchronisation réussie le " + new Date(cached.savedAt).toLocaleString("fr-FR") + ".";
       $("#cache-note").classList.remove("hidden"); $("#sync-status").textContent = "Copie locale"; return;
     }
-    $("#login").classList.add("hidden"); $("#empty").classList.remove("hidden");
-    $("#empty-message").textContent = "Publication momentanément indisponible. Vérifiez votre connexion puis réessayez.";
+    showLogin(error?.message || "Code refusé ou publication momentanément indisponible. Vérifiez le code puis réessayez.");
+    $("#empty").classList.add("hidden");
     $("#sync-status").textContent = "Hors ligne";
   }
-  const boot = () => load().catch(failure);
-  $("#retry").addEventListener("click", () => { $("#empty").classList.add("hidden"); $("#login").classList.remove("hidden"); boot(); });
+  const boot = () => state.ownerCode ? load(state.ownerCode).catch(failure) : showLogin("Scannez le QR code ou saisissez votre code d’accès pour continuer.");
+  $("#scan-owner-qr").addEventListener("click", () => startScanner().catch(error => { stopScanner(); $("#login-error").textContent = error.message; }));
+  $("#stop-owner-qr").addEventListener("click", stopScanner);
+  $("#owner-login").addEventListener("click", () => { stopScanner(); load($("#owner-code").value).catch(failure); });
+  $("#owner-code").addEventListener("keydown", event => { if (event.key === "Enter") $("#owner-login").click(); });
+  $("#retry").addEventListener("click", () => { $("#empty").classList.add("hidden"); showLogin(); boot(); });
   $("#period").addEventListener("change", () => { state.fin = 12; state.ops = 10; $("#custom-period").classList.toggle("hidden", $("#period").value !== "custom"); if ($("#period").value !== "custom") renderPeriod(); });
   $("#apply-period").addEventListener("click", () => {
     $("#sync-status").textContent = "Actualisation…";
-    load().catch(() => { $("#sync-status").textContent = "Actualisation impossible"; });
+    load(state.ownerCode).catch(() => { $("#sync-status").textContent = "Actualisation impossible"; });
   });
-  boot();
+  showLogin("Scannez le QR code ou saisissez votre code d’accès pour continuer.");
   if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
 })();
