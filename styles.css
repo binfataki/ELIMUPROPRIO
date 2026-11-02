@@ -95,3 +95,17 @@ select:focus,input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 
+/* Finition UI/UX professionnelle */
+:root{--paper:#f4f7fb;--line:#d2dfef;--shadow:0 10px 28px rgba(23,55,104,.08)}
+body{background:linear-gradient(180deg,#edf3fb 0,#f8fafc 46%,#f4f7fb 100%)}
+.topbar{padding-top:calc(10px + env(safe-area-inset-top));padding-bottom:10px;border-bottom:3px solid var(--gold);box-shadow:0 8px 24px rgba(10,25,55,.18)}
+.brand img{width:46px;height:46px;box-shadow:0 2px 8px rgba(0,0,0,.16)}.brand strong{font-size:17px}.brand small{margin-top:3px}
+main{padding-top:24px}.welcome{margin-bottom:22px}.welcome h1{font-weight:800}
+.panel,.login-card,.empty{border-radius:18px;border-color:rgba(210,223,239,.9);box-shadow:var(--shadow)}.panel{padding:20px}.panel h2{font-size:20px}
+.period-panel{background:linear-gradient(135deg,#fff,#f7faff)}
+select,input{border-color:#b9cbe1;background:#fff}select:hover,input:hover{border-color:#8eabd0}
+.primary,.quiet,.qr-primary-button{transition:transform 150ms ease,box-shadow 150ms ease,filter 150ms ease}.primary:hover,.qr-primary-button:hover{filter:brightness(1.04);box-shadow:0 8px 18px rgba(31,98,189,.24)}.quiet:hover{background:#f1f5fa}
+.summary-grid{gap:12px}.metric{border-radius:15px;padding:16px;box-shadow:var(--shadow);transition:transform 150ms ease,box-shadow 150ms ease}.metric:hover{transform:translateY(-2px);box-shadow:0 14px 32px rgba(23,55,104,.12)}.metric strong{font-size:28px}
+.flow-card{border-radius:12px;padding:14px 16px}.operation{padding:14px 2px}.operation-dot{box-shadow:0 0 0 4px rgba(228,179,41,.12)}
+.login-shell{min-height:58vh}.login-card{padding:28px 22px}.qr-primary-button{border-radius:16px;box-shadow:0 12px 26px rgba(31,98,189,.2)}
+
